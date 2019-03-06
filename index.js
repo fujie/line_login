@@ -71,6 +71,4 @@ app.get('/cb', function (req, res) {
       httpreq.end();
 })
 
-
-//サーバー起動
 app.listen(PORT, () => console.log(`Server running at ${PORT}`));

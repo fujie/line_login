@@ -21,7 +21,12 @@ app.use(session({
         maxAge: 30*60*1000
     }
 }));
-app.get('/', function (req, res) {
+
+app.get('/', function(req, res) {
+    res.send('<html><body><form method="get" action="/login"><button type="submit">login</button></form></body></html>');
+});
+
+app.get('/login', function (req, res) {
     req.session.state = random.randomBytes(16).toString('hex');
     // redirect to authorization endpoint
     // parameters
@@ -41,7 +46,19 @@ app.get('/', function (req, res) {
     res.redirect(destination);
 })
 
-app.get('/cb', function (req, resp) {
+app.get('/cb', function (req, res) {
+    res.send('<html><body>'
+            + '<form method="post" action="' + token_endpoint + '">'
+            + '<table><tr><th>grant_type</th><td><input type="text" name="grant_type" value="authorization_code"></td></tr>'
+            + '<tr><th>code</th><td><input type="text" name="code" value="' + req.query.code + '"></td></tr>'
+            + '<tr><th>redirect_uri</th><td><input type="text" name="redirect_uri" value="' + redirect_uri + '"></td></tr>'
+            + '<tr><th>client_id</th><td><input type="text" name="client_id" value="' + client_id + '"></td></tr>'
+            + '<tr><th>client_secret</th><td><input type="text" name="client_secret" value="' + client_secret + '"></td></tr>'
+            + '</table><button type="submit">Exchange code to token</button><br>'
+            + '</form></body></html>'
+         );
+})
+app.get('/cb2', function (req, resp) {
     // verify state
     if(req.query.state != req.session.state){
         resp.send("state unmatch error");

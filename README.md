@@ -9,6 +9,7 @@
 #### 必要物
 - node.js(v10.13.0で動作確認済み)
 - Visual Studio Code(1.32.1 for Windowsで作成)
+- git(2.19.2.windows.1で動作確認)
 - LINEアカウント
 - [LINE Developers Console](https://developers.line.biz/console/)へのアクセスが出来ること
 #### 導入
@@ -49,10 +50,39 @@
 設定が終わったチャネルを公開します。  
 ![公開](https://github.com/fujie/line_login/blob/media/8.publish.png)  
 
-##### コードのクローン
-1. 以下のコマンドで本レポジトリをローカルにクローンします。  
+##### コードのクローン～セットアップ
+1. ローカルの任意の場所に新規フォルダを作成する  
+2. Visual Studio Codeを開き、作成したフォルダをVisual Studio Code上へドラッグ＆ドロップする  
+3. `CTRL+@`でターミナルを開く  
+4. 本レポジトリをローカルにクローン  
 `git clone https://github.com/fujie/line_login.git`
-2. index.jsのコードを修正します。
+5. index.jsのコードを修正する
 ![Channel ID/Secret](https://github.com/fujie/line_login/blob/media/9.modify.png)  
+6. ターミナルでline_loginフォルダへ移動する  
+`cd line_login`
+7. index.jsを実行する  
+`node index.js`
+
+##### 動作確認
+1. ブラウザで`http://localhost:3000`を開く  
+![起動](https://github.com/fujie/line_login/blob/media/10.initialize.png)  
+2. loginボタンをクリックするとLINEログイン画面へ遷移する  
+![ログイン](https://github.com/fujie/line_login/blob/media/11.login.png)  
+3. QRコードログインを選択する  
+![QRログイン](https://github.com/fujie/line_login/blob/media/11.qrlogin.png)  
+4. スマホのLINEの友だち追加用のQRリーダでQRを読み込む  
+5. 表示される番号をスマホ側に入力する  
+![ログインコード](https://github.com/fujie/line_login/blob/media/12.login.png)  
+6. 属性取得に関する同意画面が出るので同意する  
+![同意](https://github.com/fujie/line_login/blob/media/13.login.png)  
+7. 認可コードが取得できるので、`exchange code to token`をクリックする  
+![認可コード](https://github.com/fujie/line_login/blob/media/14.code.png)  
+8. トークン（access_token, refresh_token, id_token）が取得できる  
+![トークン](https://github.com/fujie/line_login/blob/media/15.token.png)  
+9. id_tokenのリンクをクリックし、id_tokenの内容を確認する  
+新しいタブが開き、[https://jwt.ms](https://jwt.ms)で取得したid_tokenの中身が確認できる  
+![IDトークン](https://github.com/fujie/line_login/blob/media/16.id_token.png)  
+10. 元のタブに戻り、`get userinfo`をクリックし、プロファイルを取得する  
+![userinfo](https://github.com/fujie/line_login/blob/media/17.userinfo.png)  
 
 

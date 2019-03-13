@@ -9,8 +9,10 @@ const app = express();
 const authorization_endpoint = 'https://access.line.me/oauth2/v2.1/authorize';
 const token_endpoint = 'https://api.line.me/oauth2/v2.1/token';
 const profile_endpoint = 'https://api.line.me/v2/profile';
-const client_id = '1516319320';
-const client_secret = 'fd1a749be0c9d7eb21faf4810cdcfd4a';
+//const client_id = '1516319320';
+const client_id = '1537859534';
+//const client_secret = 'fd1a749be0c9d7eb21faf4810cdcfd4a';
+const client_secret = 'fdb329ce3924dd50c043fdade69595f3';
 const redirect_uri = 'http://localhost:3000/cb';
 
 app.use(session({
@@ -28,6 +30,7 @@ app.get('/', function(req, res) {
 
 app.get('/login', function (req, res) {
     req.session.state = random.randomBytes(16).toString('hex');
+    req.session.nonce = uuidv4();
     // redirect to authorization endpoint
     // parameters
     //  response_type : code
@@ -40,13 +43,13 @@ app.get('/login', function (req, res) {
                     + 'response_type=code&'
                     + 'client_id=' + client_id + '&'
                     + 'redirect_uri=' + redirect_uri + '&'
-                    + 'scope=openid%20profile&'
+                    + 'scope=openid%20profile%20email&'
                     + 'state=' + req.session.state + '&'
-                    + 'nonce=' + uuidv4();
+                    + 'nonce=' + req.session.nonce;
     res.redirect(destination);
 })
 
-app.get('/cb', function (req, res) {
+app.get('/cb_', function (req, res) {
     res.send('<html><body>'
             + '<form method="post" action="' + token_endpoint + '">'
             + '<table><tr><th>grant_type</th><td><input type="text" name="grant_type" value="authorization_code"></td></tr>'
@@ -58,7 +61,7 @@ app.get('/cb', function (req, res) {
             + '</form></body></html>'
          );
 })
-app.get('/cb2', function (req, resp) {
+app.get('/cb', function (req, resp) {
     // verify state
     if(req.query.state != req.session.state){
         resp.send("state unmatch error");
@@ -78,7 +81,27 @@ app.get('/cb2', function (req, resp) {
             function(err, res, body){
                 if (!err && res.statusCode == 200) {
                     console.log(body);
-                    resp.json(body);
+//                    resp.json(body);
+                    var jsonBody = JSON.parse(body);
+//                    resp.send(jsonBody.access_token);
+                    // get nonce from id_token and verify
+                    
+                    request.get(
+                        profile_endpoint,
+                        {
+                            headers: {
+                                'Authorization': 'Bearer ' + jsonBody.access_token
+                            }
+                        },
+                        function(err, res, body){
+                            if (!err && res.statusCode == 200) {
+                                console.log(body);
+                                resp.send(body);
+                            } else {
+                                console.log("error" + res.statusCode.toString());
+                            }
+                        }
+                    )
                 } else {
                     resp.send("error");
                     console.log(body);

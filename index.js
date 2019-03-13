@@ -25,10 +25,16 @@ app.use(session({
 }));
 app.use(bodyParser.urlencoded({extended: true}));
 
+//
+// Start
+//
 app.get('/', function(req, res) {
     res.send('<html><body><form method="get" action="/login"><button type="submit">login</button></form></body></html>');
 });
 
+//
+// login request
+//
 app.get('/login', function (req, res) {
     req.session.state = random.randomBytes(16).toString('hex');
     req.session.nonce = uuidv4();
@@ -38,8 +44,8 @@ app.get('/login', function (req, res) {
     //  client_id     : client id
     //  redirect_uri  : callback uri
     //  scope         : openid profile
-    //  state         : 
-    //  nonce         :
+    //  state         : random value associated with session
+    //  nonce         : unique guid associated with session
     let destination = authorization_endpoint + '?'
                     + 'response_type=code&'
                     + 'client_id=' + client_id + '&'
@@ -50,11 +56,16 @@ app.get('/login', function (req, res) {
     res.redirect(destination);
 })
 
+//
+// callback
+//
 app.get('/cb', function (req, res) {
+    // verify state
     if(req.query.state != req.session.state){
         resp.send("state unmatch error");
         console.log('state unmatch!');
     } else {
+        // show form
         res.send('<html><body>'
                 + '<form method="post" action="/token">'
                 + '<table><tr><th>grant_type</th><td><input type="text" name="grant_type" size="100" value="authorization_code"></td></tr>'
@@ -68,28 +79,39 @@ app.get('/cb', function (req, res) {
     }
 })
 
-app.post('/token', function (req, resp) {
+//
+// obtain token
+//
+app.post('/token', function (req, res) {
     // post authorization code and exchange to access_token, id_token
+    // parameters
+    //  grant_type    : authorization_code
+    //  code          : code
+    //  redirect_uri  : callback uri
+    //  client_id     : client_id
+    //  client_secret : client_secret
     request.post(
         token_endpoint,
         {form:
-        {
-            grant_type: 'authorization_code',
-            code: req.body.code,
-            redirect_uri: redirect_uri,
-            client_id: client_id,
-            client_secret: client_secret
-        }},
-        function(err, res, body){
-            if (!err && res.statusCode == 200) {
+            {
+                grant_type: 'authorization_code',
+                code: req.body.code,
+                redirect_uri: redirect_uri,
+                client_id: client_id,
+                client_secret: client_secret
+            }
+        },
+        function(e, r, body){
+            if (!e && r.statusCode == 200) {
                 var jsonBody = JSON.parse(body);
                 // verify nonce in jwt
                 var id_token = jwt_decode(jsonBody.id_token);
                 if (id_token.nonce != req.session.nonce){
-                    resp.send("nonce unmatch error");
+                    res.send("nonce unmatch error");
                     console.log('nonce unmatch!');            
                 } else {
-                    resp.send('<html><body>'
+                    // show form
+                    res.send('<html><body>'
                         + '<form method="post" action="/userInfo">'
                         + '<table><tr><th>access_token</th><td><input type="text" name="access_token" size="100" value="' + jsonBody.access_token + '"></td></tr>'
                         + '<tr><th>token_type</th><td><input type="text" name="token_type" size="100" value="' + jsonBody.token_type + '"></td></tr>'
@@ -102,14 +124,20 @@ app.post('/token', function (req, resp) {
                     );
                 }
             } else {
-                resp.send("error");
+                res.send("error");
                 console.log(body);
             }               
         }
     )
 })
 
-app.post('/userInfo', function (req, resp) {
+//
+// get userinfo
+//
+app.post('/userInfo', function (req, res) {
+    // get user profile from userInfo endpoint
+    // headers
+    //   Authorization: Bearer access_token
     request.get(
         profile_endpoint,
         {
@@ -117,10 +145,10 @@ app.post('/userInfo', function (req, resp) {
                 'Authorization': 'Bearer ' + req.body.access_token
             }
         },
-        function(err, res, body){
-            if (!err && res.statusCode == 200) {
+        function(e, r, body){
+            if (!e && r.statusCode == 200) {
                 var jsonBody = JSON.parse(body);
-                resp.send('<html><body>'
+                res.send('<html><body>'
                     + '<table border="1"><tr><th>userId</th><td>' + jsonBody.userId + '</td></tr>'
                     + '<tr><th>displayName</th><td>' + jsonBody.displayName + '</td></tr>'
                     + '<tr><th>pictureUrl</th><td>' + jsonBody.pictureUrl + '</td></tr>'
@@ -128,10 +156,12 @@ app.post('/userInfo', function (req, resp) {
                     + '</body></html>'
                 );
             } else {
-                console.log("error" + res.statusCode.toString());
+                res.send("error");
+                console.log(body);
             }
         }
     )
 })
 
+// start server
 app.listen(PORT, () => console.log(`Server running at ${PORT}`));

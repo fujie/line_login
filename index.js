@@ -11,11 +11,7 @@ const app = express();
 const authorization_endpoint = 'https://access.line.me/oauth2/v2.1/authorize';
 const token_endpoint = 'https://api.line.me/oauth2/v2.1/token';
 const profile_endpoint = 'https://api.line.me/v2/profile';
-<<<<<<< HEAD
 const client_id = '{your client_id}';
-=======
-const client_id = '{your client_id}';
->>>>>>> 753f54e5c9dd6f08f14c9912695f96f022525826
 const client_secret = '{your client_secret}';
 const redirect_uri = 'http://localhost:3000/cb';
 

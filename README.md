@@ -61,12 +61,14 @@
 2. Visual Studio Codeを開き、作成したフォルダをVisual Studio Code上へドラッグ＆ドロップする  
 3. `CTRL+@`でターミナルを開く  
 4. 本レポジトリをローカルにクローン  
-`git clone https://github.com/fujie/line_login.git`
+`git clone https://github.com/fujie/line_login.git`  
 5. index.jsのコードを修正する
 ![Channel ID/Secret](https://github.com/fujie/line_login/blob/media/9.modify.png)  
 6. ターミナルでline_loginフォルダへ移動する  
 `cd line_login`
-7. index.jsを実行する  
+7. モジュールのインストール  
+`npm install`
+8. index.jsを実行する  
 `node index.js`
 
 ##### 動作確認

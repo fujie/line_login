@@ -12,6 +12,7 @@
   "dependencies": {
     "express": "^4.16.4",
     "express-session": "^1.15.6",
+    "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^2.2.0",
     "request": "^2.88.0"
   }
